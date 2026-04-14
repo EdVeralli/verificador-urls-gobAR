@@ -17,6 +17,10 @@ import sys
 import concurrent.futures
 from urllib.parse import urlparse
 
+# Forzar UTF-8 en la consola de Windows
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 try:
     import requests
 except ImportError:
