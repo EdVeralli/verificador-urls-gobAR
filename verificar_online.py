@@ -123,11 +123,16 @@ def leer_urls(path):
     wb = openpyxl.load_workbook(path)
     ws = wb.active
     items = []
+    excluidas = 0
     for row_idx, row in enumerate(ws.iter_rows(values_only=True), 1):
         val = row[0]
-        if val and str(val).strip():
-            items.append((row_idx, str(val).strip()))
-    return items
+        if not val or not str(val).strip():
+            continue
+        if "descubrir" in str(val).lower():
+            excluidas += 1
+            continue
+        items.append((row_idx, str(val).strip()))
+    return items, excluidas
 
 
 def guardar_resultado(path, results):
@@ -175,10 +180,11 @@ def main():
     print(f"  Verificador Online de URLs — gob.ar")
     print(f"{'='*65}")
 
-    items = leer_urls(XLSX_INPUT)
+    items, excluidas = leer_urls(XLSX_INPUT)
     total = len(items)
     print(f"  Entrada          : {XLSX_INPUT}")
     print(f"  URLs a verificar : {total}")
+    print(f"  Excluidas (descubrir): {excluidas}")
     print(f"  Simultáneas      : {MAX_WORKERS}")
     print(f"  Timeout          : {TIMEOUT}s")
     print(f"{'='*65}\n")
@@ -215,8 +221,9 @@ def main():
     print(f"  ⚠️  ACCESO DENEGADO: {len(denegado)}")
     print(f"  🚫 INVÁLIDAS       : {len(invalida)}")
     print(f"  ⚠️  OTROS ERRORES  : {len(otros)}")
+    print(f"  🚫 EXCLUIDAS (descubrir): {excluidas}")
     print(f"  {'─'*45}")
-    print(f"  TOTAL              : {total}")
+    print(f"  TOTAL              : {total + excluidas}")
     print(f"{'='*65}")
     print(f"\n  Resultado guardado en: {XLSX_OUTPUT}\n")
 
